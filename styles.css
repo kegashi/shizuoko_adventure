@@ -3,12 +3,11 @@
   --ink: #1d1b1b;
   --panel: rgba(255, 255, 255, 0.86);
   --accent: #db342f;
-  --tea: #47a854;
-  --sky: #78c9e8;
 }
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -35,8 +34,6 @@ body {
     sans-serif;
   justify-content: center;
   padding: 18px;
-  overflow-x: hidden;
-  width: 100%;
 }
 
 button {
@@ -45,11 +42,16 @@ button {
   font: inherit;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .game-shell {
   display: grid;
   gap: 12px;
-  min-width: 0;
   max-width: 1180px;
+  min-width: 0;
   width: min(100%, 1180px);
 }
 
@@ -62,13 +64,16 @@ button {
   min-width: 0;
   overflow: hidden;
   position: relative;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   width: 100%;
 }
 
 canvas {
   display: block;
   height: 100%;
-  image-rendering: auto;
   width: 100%;
 }
 
@@ -76,8 +81,10 @@ canvas {
   display: flex;
   gap: 8px;
   left: 12px;
+  pointer-events: none;
   position: absolute;
   top: 12px;
+  z-index: 5;
 }
 
 .hud > div {
@@ -133,6 +140,7 @@ canvas {
   padding: 20px;
   position: absolute;
   text-align: center;
+  user-select: none;
   z-index: 10;
 }
 
@@ -140,10 +148,7 @@ canvas {
   display: flex;
 }
 
-.stage-wrap:has(.message.is-visible) .hud {
-  display: none;
-}
-
+.stage-wrap:has(.message.is-visible) .hud,
 .stage-wrap:has(.message.is-visible) .touch-controls {
   display: none;
 }
@@ -175,7 +180,6 @@ canvas {
   margin: 0 0 16px;
   max-width: calc(100% - 28px);
   overflow-wrap: anywhere;
-  word-break: break-all;
 }
 
 .controls-guide {
@@ -209,7 +213,6 @@ canvas {
   font-size: 16px;
   font-weight: 900;
   line-height: 1.25;
-  overflow-wrap: anywhere;
 }
 
 .message button,
@@ -225,35 +228,33 @@ canvas {
   font-size: 20px;
   min-width: 160px;
   padding: 12px 22px;
+  touch-action: manipulation;
 }
 
 .touch-controls {
   display: none;
-  gap: 10px;
-  justify-content: center;
+}
+
+.touch-controls button {
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28);
+  position: absolute;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+}
+
+.touch-controls .jump {
+  background: rgba(219, 52, 47, 0.93);
+}
+
+.touch-controls .attack {
+  background: rgba(44, 143, 159, 0.93);
 }
 
 .rotate-hint {
   display: none;
-}
-
-.touch-controls button {
-  aspect-ratio: 1;
-  font-size: 24px;
-  min-width: 68px;
-  touch-action: none;
-}
-
-.touch-controls .jump {
-  aspect-ratio: auto;
-  background: var(--accent);
-  min-width: 112px;
-}
-
-.touch-controls .attack {
-  aspect-ratio: auto;
-  background: #2c8f9f;
-  min-width: 104px;
 }
 
 @media (max-width: 760px), (hover: none) {
@@ -261,6 +262,7 @@ canvas {
   body {
     height: 100vh;
     min-height: 100vh;
+    overflow: hidden;
   }
 
   body {
@@ -271,6 +273,7 @@ canvas {
 
   .game-shell {
     display: block;
+    height: 100vh;
     max-width: none;
     width: 100vw;
   }
@@ -291,10 +294,11 @@ canvas {
     left: 8px;
     max-width: calc(100% - 16px);
     right: 8px;
-    top: 8px;
+    top: max(18px, calc(env(safe-area-inset-top) + 12px));
   }
 
   .hud > div {
+    background: rgba(255, 255, 255, 0.9);
     min-width: 68px;
     padding: 5px 7px;
   }
@@ -323,77 +327,107 @@ canvas {
     font-size: 14px;
   }
 
+  .controls-guide {
+    display: none;
+  }
+
+  .message {
+    padding: 12px;
+  }
+
   .message h1 {
-    font-size: clamp(24px, 9vw, 34px);
+    font-size: clamp(26px, 8vh, 42px);
     margin-bottom: 6px;
+    text-wrap: balance;
   }
 
   .message p {
-    font-size: 13px;
+    font-size: clamp(13px, 3.2vh, 16px);
     line-height: 1.35;
-    margin-bottom: 8px;
-    max-width: 18em;
-  }
-
-  .controls-guide {
-    gap: 4px;
-    grid-template-columns: 1fr;
-    margin-bottom: 8px;
-    max-width: min(260px, calc(100% - 28px));
-  }
-
-  .controls-guide div {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 8px;
-  }
-
-  .controls-guide dt {
-    font-size: 10px;
-  }
-
-  .controls-guide dd {
-    font-size: 12px;
+    margin-bottom: 12px;
+    max-width: 44em;
+    text-wrap: balance;
   }
 
   .message button {
     font-size: 17px;
-    min-width: 150px;
-    padding: 9px 18px;
+    padding: 8px 18px;
   }
 
   .touch-controls {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: clamp(86px, 17vw, 132px) clamp(68px, 13vw, 104px);
-    left: 50%;
+    bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+    display: block;
+    height: clamp(44px, 9vw, 58px);
+    left: 0;
+    pointer-events: none;
     position: absolute;
-    bottom: 14px;
-    transform: translateX(-50%);
-    width: auto;
+    right: 0;
+    width: 100%;
     z-index: 6;
   }
 
   .touch-controls button {
-    aspect-ratio: auto;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28);
     font-size: clamp(16px, 3.8vw, 22px);
     height: clamp(44px, 9vw, 58px);
-    min-width: 0;
-    width: 100%;
+    pointer-events: auto;
+    width: clamp(92px, 18vw, 136px);
   }
 
   .touch-controls .jump {
-    min-width: 0;
+    bottom: 0;
+    left: max(14px, env(safe-area-inset-left));
   }
 
   .touch-controls .attack {
-    min-width: 0;
+    bottom: 0;
+    right: max(14px, env(safe-area-inset-right));
+    width: clamp(74px, 14vw, 108px);
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .stage-wrap {
+    aspect-ratio: auto;
+    height: 100vh;
+    min-height: 100vh;
+    width: 100vw;
+  }
+
+  .hud {
+    top: max(20px, calc(env(safe-area-inset-top) + 14px));
+  }
+
+  .rotate-hint {
+    display: none;
   }
 }
 
 @media (max-width: 760px) and (orientation: portrait) {
+  .hud,
+  .touch-controls {
+    display: none;
+  }
+
+  .message {
+    padding-top: 34px;
+  }
+
+  .message h1 {
+    font-size: clamp(24px, 8vw, 32px);
+    max-width: calc(100% - 24px);
+  }
+
+  .message p {
+    font-size: 13px;
+    max-width: 18em;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .message button {
+    display: none;
+  }
+
   .rotate-hint {
     background: rgba(29, 27, 27, 0.78);
     border-radius: 8px;
@@ -403,17 +437,11 @@ canvas {
     font-weight: 900;
     left: 50%;
     padding: 6px 10px;
+    pointer-events: none;
     position: absolute;
     top: 8px;
     transform: translateX(-50%);
-    z-index: 7;
-  }
-}
-
-@media (max-width: 760px) and (orientation: landscape) {
-  .stage-wrap {
-    aspect-ratio: auto;
-    height: 100vh;
-    width: 100vw;
+    white-space: nowrap;
+    z-index: 11;
   }
 }

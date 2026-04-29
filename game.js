@@ -635,9 +635,18 @@ function releaseJump() {
   keys.jump = false;
 }
 
+function isPortraitMobile() {
+  return window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
+}
+
+function tryStartGame() {
+  if (isPortraitMobile()) return;
+  resetGame();
+}
+
 window.addEventListener("keydown", (event) => {
   if (messageEl.classList.contains("is-visible") && ["Enter", "Space"].includes(event.code)) {
-    resetGame();
+    tryStartGame();
     event.preventDefault();
     return;
   }
@@ -661,6 +670,7 @@ document.querySelectorAll("[data-hold]").forEach((button) => {
   const name = button.dataset.hold;
   const on = (event) => {
     event.preventDefault();
+    button.setPointerCapture?.(event.pointerId);
     if (name === "jump") pressJump();
     else setKey(name, true);
   };
@@ -673,11 +683,14 @@ document.querySelectorAll("[data-hold]").forEach((button) => {
   button.addEventListener("pointerup", off);
   button.addEventListener("pointercancel", off);
   button.addEventListener("pointerleave", off);
+  button.addEventListener("contextmenu", (event) => event.preventDefault());
+  button.addEventListener("selectstart", (event) => event.preventDefault());
 });
 
 document.querySelectorAll("[data-tap]").forEach((button) => {
   button.addEventListener("pointerdown", (event) => {
     event.preventDefault();
+    button.setPointerCapture?.(event.pointerId);
     setKey(button.dataset.tap, true);
   });
   button.addEventListener("pointerup", (event) => {
@@ -685,9 +698,11 @@ document.querySelectorAll("[data-tap]").forEach((button) => {
     setKey(button.dataset.tap, false);
   });
   button.addEventListener("pointercancel", () => setKey(button.dataset.tap, false));
+  button.addEventListener("contextmenu", (event) => event.preventDefault());
+  button.addEventListener("selectstart", (event) => event.preventDefault());
 });
 
-startButton.addEventListener("click", resetGame);
+startButton.addEventListener("click", tryStartGame);
 
 loadImages().then(() => {
   resetGame();
