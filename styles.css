@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+  --app-height: 100dvh;
   --ink: #1d1b1b;
   --panel: rgba(255, 255, 255, 0.86);
   --accent: #db342f;
@@ -260,8 +261,8 @@ canvas {
 @media (max-width: 760px), (hover: none) {
   html,
   body {
-    height: 100vh;
-    min-height: 100vh;
+    height: var(--app-height);
+    min-height: var(--app-height);
     overflow: hidden;
   }
 
@@ -273,7 +274,7 @@ canvas {
 
   .game-shell {
     display: block;
-    height: 100vh;
+    height: var(--app-height);
     max-width: none;
     width: 100vw;
   }
@@ -282,9 +283,9 @@ canvas {
     border-radius: 0;
     border-width: 0;
     box-shadow: none;
-    height: min(100vh, calc(100vw * 9 / 16));
+    height: min(var(--app-height), calc(100vw * 9 / 16));
     margin: 0 auto;
-    width: min(100vw, calc(100vh * 16 / 9));
+    width: min(100vw, calc(var(--app-height) * 16 / 9));
   }
 
   .hud {
@@ -397,8 +398,8 @@ canvas {
 @media (max-width: 760px) and (orientation: landscape) {
   .stage-wrap {
     aspect-ratio: auto;
-    height: 100vh;
-    min-height: 100vh;
+    height: var(--app-height);
+    min-height: var(--app-height);
     width: 100vw;
   }
 

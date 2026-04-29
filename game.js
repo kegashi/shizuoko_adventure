@@ -39,6 +39,17 @@ const keys = {
   attack: false,
 };
 
+function updateViewportHeight() {
+  const height = window.visualViewport?.height || window.innerHeight;
+  document.documentElement.style.setProperty("--app-height", `${height}px`);
+}
+
+updateViewportHeight();
+window.addEventListener("resize", updateViewportHeight);
+window.addEventListener("orientationchange", () => setTimeout(updateViewportHeight, 120));
+window.visualViewport?.addEventListener("resize", updateViewportHeight);
+window.visualViewport?.addEventListener("scroll", updateViewportHeight);
+
 let state;
 let lastT = 0;
 let cameraX = 0;
