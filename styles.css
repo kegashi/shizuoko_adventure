@@ -237,7 +237,7 @@ canvas {
 
 .touch-controls button {
   border: 2px solid rgba(255, 255, 255, 0.24);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
   position: absolute;
   touch-action: none;
   user-select: none;
@@ -246,11 +246,11 @@ canvas {
 }
 
 .touch-controls .jump {
-  background: rgba(219, 52, 47, 0.93);
+  background: rgba(219, 52, 47, 0.72);
 }
 
 .touch-controls .attack {
-  background: rgba(44, 143, 159, 0.93);
+  background: rgba(44, 143, 159, 0.72);
 }
 
 .rotate-hint {
@@ -355,9 +355,9 @@ canvas {
   }
 
   .touch-controls {
-    bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 8px));
     display: block;
-    height: clamp(44px, 9vw, 58px);
+    height: clamp(34px, 6.8vw, 46px);
     left: 0;
     pointer-events: none;
     position: absolute;
@@ -367,10 +367,13 @@ canvas {
   }
 
   .touch-controls button {
-    font-size: clamp(16px, 3.8vw, 22px);
-    height: clamp(44px, 9vw, 58px);
+    border-radius: 7px;
+    font-size: clamp(15px, 3vw, 20px);
+    height: clamp(34px, 6.8vw, 46px);
+    line-height: 1;
     pointer-events: auto;
-    width: clamp(92px, 18vw, 136px);
+    white-space: nowrap;
+    width: clamp(96px, 16vw, 128px);
   }
 
   .touch-controls .jump {
@@ -381,7 +384,7 @@ canvas {
   .touch-controls .attack {
     bottom: 0;
     right: max(14px, env(safe-area-inset-right));
-    width: clamp(74px, 14vw, 108px);
+    width: clamp(104px, 16vw, 132px);
   }
 }
 
