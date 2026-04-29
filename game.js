@@ -42,6 +42,7 @@ const keys = {
 function updateViewportHeight() {
   const height = window.visualViewport?.height || window.innerHeight;
   document.documentElement.style.setProperty("--app-height", `${height}px`);
+  document.documentElement.classList.toggle("is-touch", navigator.maxTouchPoints > 0);
 }
 
 updateViewportHeight();
@@ -652,6 +653,8 @@ function isPortraitMobile() {
 
 function tryStartGame() {
   if (isPortraitMobile()) return;
+  document.documentElement.requestFullscreen?.().catch?.(() => {});
+  document.documentElement.webkitRequestFullscreen?.();
   resetGame();
 }
 

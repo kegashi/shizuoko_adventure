@@ -1,6 +1,7 @@
 :root {
   color-scheme: light;
   --app-height: 100dvh;
+  --mobile-browser-bottom-gap: 0px;
   --ink: #1d1b1b;
   --panel: rgba(255, 255, 255, 0.86);
   --accent: #db342f;
@@ -258,7 +259,11 @@ canvas {
   display: none;
 }
 
-@media (max-width: 760px), (hover: none) {
+html.is-touch {
+  --mobile-browser-bottom-gap: 72px;
+}
+
+@media (max-width: 760px), (hover: none), (pointer: coarse), (max-height: 500px) {
   html,
   body {
     height: var(--app-height);
@@ -395,11 +400,14 @@ canvas {
   }
 }
 
-@media (max-width: 760px) and (orientation: landscape) {
+@media (max-width: 760px) and (orientation: landscape),
+  (hover: none) and (orientation: landscape),
+  (pointer: coarse) and (orientation: landscape),
+  (max-height: 500px) and (orientation: landscape) {
   .stage-wrap {
     aspect-ratio: auto;
-    height: var(--app-height);
-    min-height: var(--app-height);
+    height: calc(var(--app-height) - var(--mobile-browser-bottom-gap));
+    min-height: calc(var(--app-height) - var(--mobile-browser-bottom-gap));
     width: 100vw;
   }
 
@@ -412,7 +420,9 @@ canvas {
   }
 }
 
-@media (max-width: 760px) and (orientation: portrait) {
+@media (max-width: 760px) and (orientation: portrait),
+  (hover: none) and (orientation: portrait),
+  (pointer: coarse) and (orientation: portrait) {
   .hud,
   .touch-controls {
     display: none;
