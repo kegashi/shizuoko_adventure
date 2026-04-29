@@ -647,12 +647,7 @@ function releaseJump() {
   keys.jump = false;
 }
 
-function isPortraitMobile() {
-  return window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches;
-}
-
 function tryStartGame() {
-  if (isPortraitMobile()) return;
   document.documentElement.requestFullscreen?.().catch?.(() => {});
   document.documentElement.webkitRequestFullscreen?.();
   resetGame();

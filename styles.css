@@ -423,13 +423,64 @@ html.is-touch {
 @media (max-width: 760px) and (orientation: portrait),
   (hover: none) and (orientation: portrait),
   (pointer: coarse) and (orientation: portrait) {
-  .hud,
+  body {
+    align-items: start;
+  }
+
+  .game-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: var(--app-height);
+  }
+
+  .stage-wrap {
+    aspect-ratio: 16 / 9;
+    flex: 0 0 auto;
+    height: auto;
+    overflow: hidden;
+    width: 100vw;
+  }
+
+  .hud {
+    top: 8px;
+  }
+
   .touch-controls {
-    display: none;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    display: grid;
+    flex: 0 0 auto;
+    gap: 12px;
+    grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
+    height: auto;
+    left: auto;
+    margin: 0 auto;
+    padding: 0 12px max(10px, env(safe-area-inset-bottom));
+    pointer-events: none;
+    position: static;
+    right: auto;
+    width: min(100%, 420px);
+    z-index: 1;
+  }
+
+  .touch-controls button {
+    display: flex;
+    height: 52px;
+    position: static;
+    width: 100%;
+  }
+
+  .touch-controls .jump,
+  .touch-controls .attack {
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
   }
 
   .message {
-    padding-top: 34px;
+    padding-top: 12px;
   }
 
   .message h1 {
@@ -445,23 +496,10 @@ html.is-touch {
   }
 
   .message button {
-    display: none;
+    display: inline-block;
   }
 
   .rotate-hint {
-    background: rgba(29, 27, 27, 0.78);
-    border-radius: 8px;
-    color: white;
-    display: block;
-    font-size: 12px;
-    font-weight: 900;
-    left: 50%;
-    padding: 6px 10px;
-    pointer-events: none;
-    position: absolute;
-    top: 8px;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    z-index: 11;
+    display: none;
   }
 }
