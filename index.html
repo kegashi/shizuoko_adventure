@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>スーパーしずオ</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="stage-wrap" aria-label="スーパーしずオ">
+        <canvas id="game" width="960" height="540"></canvas>
+        <div class="hud" aria-live="polite">
+          <div>
+            <span class="hud-label">いちご</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span class="hud-label">距離</span>
+            <strong id="distance">0m</strong>
+          </div>
+          <div class="oko-panel">
+            <span class="hud-label">オコ(体力)</span>
+            <div class="oko-meter" aria-hidden="true">
+              <span id="okoFill"></span>
+            </div>
+            <strong id="rage">100%</strong>
+          </div>
+          <div class="time-panel">
+            <span class="hud-label">時間</span>
+            <strong id="time">0.0</strong>
+          </div>
+        </div>
+        <nav class="touch-controls" aria-label="タッチ操作">
+          <button data-hold="jump" class="jump" type="button" aria-label="ジャンプ">JUMP</button>
+          <button data-tap="attack" class="attack" type="button" aria-label="傘攻撃">ATK</button>
+        </nav>
+        <div class="rotate-hint" aria-hidden="true">横向きで遊んでください</div>
+        <div id="message" class="message">
+          <img id="messageImage" alt="" />
+          <h1>スーパーしずオ</h1>
+          <p>オコを燃やして家まで下校しよう。いちごを食べるとオコが回復するぞ！</p>
+          <dl class="controls-guide" aria-label="操作方法">
+            <div>
+              <dt>ジャンプ</dt>
+              <dd>Space / ↑ / W</dd>
+            </div>
+            <div>
+              <dt>傘攻撃</dt>
+              <dd>X / K / Shift</dd>
+            </div>
+          </dl>
+          <button id="startButton" type="button">スタート</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
