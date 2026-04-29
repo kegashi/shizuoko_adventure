@@ -246,11 +246,11 @@ canvas {
 }
 
 .touch-controls .jump {
-  background: rgba(219, 52, 47, 0.72);
+  background: rgba(44, 143, 159, 0.72);
 }
 
 .touch-controls .attack {
-  background: rgba(44, 143, 159, 0.72);
+  background: rgba(219, 52, 47, 0.72);
 }
 
 .rotate-hint {
@@ -368,12 +368,17 @@ canvas {
 
   .touch-controls button {
     border-radius: 7px;
+    align-items: center;
+    display: flex;
     font-size: clamp(15px, 3vw, 20px);
     height: clamp(34px, 6.8vw, 46px);
+    justify-content: center;
     line-height: 1;
+    overflow-wrap: normal;
     pointer-events: auto;
     white-space: nowrap;
-    width: clamp(96px, 16vw, 128px);
+    word-break: keep-all;
+    width: clamp(104px, 17vw, 136px);
   }
 
   .touch-controls .jump {
@@ -384,7 +389,8 @@ canvas {
   .touch-controls .attack {
     bottom: 0;
     right: max(14px, env(safe-area-inset-right));
-    width: clamp(104px, 16vw, 132px);
+    font-size: clamp(14px, 2.7vw, 18px);
+    width: clamp(128px, 20vw, 164px);
   }
 }
 
