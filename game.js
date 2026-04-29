@@ -647,6 +647,14 @@ function releaseJump() {
   keys.jump = false;
 }
 
+function shouldIgnoreScreenJump(event) {
+  return Boolean(event.target.closest("button, a, input, textarea, select, .touch-controls, .message"));
+}
+
+function isTouchScreenInput(event) {
+  return event.pointerType === "touch" || navigator.maxTouchPoints > 0;
+}
+
 function tryStartGame() {
   document.documentElement.requestFullscreen?.().catch?.(() => {});
   document.documentElement.webkitRequestFullscreen?.();
@@ -710,6 +718,16 @@ document.querySelectorAll("[data-tap]").forEach((button) => {
   button.addEventListener("contextmenu", (event) => event.preventDefault());
   button.addEventListener("selectstart", (event) => event.preventDefault());
 });
+
+window.addEventListener(
+  "pointerdown",
+  (event) => {
+    if (state.mode !== "play" || !isTouchScreenInput(event) || shouldIgnoreScreenJump(event)) return;
+    event.preventDefault();
+    pressJump();
+  },
+  { passive: false },
+);
 
 startButton.addEventListener("click", tryStartGame);
 

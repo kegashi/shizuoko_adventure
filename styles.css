@@ -2,6 +2,7 @@
   color-scheme: light;
   --app-height: 100dvh;
   --mobile-browser-bottom-gap: 0px;
+  --touch-controls-bottom: 18px;
   --ink: #1d1b1b;
   --panel: rgba(255, 255, 255, 0.86);
   --accent: #db342f;
@@ -361,15 +362,15 @@ html.is-touch {
   }
 
   .touch-controls {
-    bottom: max(12px, calc(env(safe-area-inset-bottom) + 8px));
+    bottom: max(var(--touch-controls-bottom), calc(env(safe-area-inset-bottom) + var(--touch-controls-bottom)));
     display: block;
     height: clamp(34px, 6.8vw, 46px);
     left: 0;
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     right: 0;
     width: 100%;
-    z-index: 6;
+    z-index: 20;
   }
 
   .touch-controls button {
@@ -447,36 +448,36 @@ html.is-touch {
   }
 
   .touch-controls {
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 10px;
-    display: grid;
-    flex: 0 0 auto;
-    gap: 12px;
-    grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
-    height: auto;
-    left: auto;
-    margin: 0 auto;
-    padding: 0 12px max(10px, env(safe-area-inset-bottom));
+    background: transparent;
+    border-radius: 0;
+    display: block;
+    height: 52px;
+    left: 0;
+    margin: 0;
+    padding: 0;
     pointer-events: none;
-    position: static;
-    right: auto;
-    width: min(100%, 420px);
-    z-index: 1;
+    position: fixed;
+    right: 0;
+    width: 100%;
+    z-index: 20;
   }
 
   .touch-controls button {
     display: flex;
     height: 52px;
-    position: static;
-    width: 100%;
+    position: absolute;
+    width: clamp(112px, 34vw, 148px);
   }
 
-  .touch-controls .jump,
+  .touch-controls .jump {
+    bottom: 0;
+    left: max(14px, env(safe-area-inset-left));
+  }
+
   .touch-controls .attack {
-    bottom: auto;
-    left: auto;
-    right: auto;
-    width: 100%;
+    bottom: 0;
+    right: max(14px, env(safe-area-inset-right));
+    width: clamp(128px, 36vw, 164px);
   }
 
   .message {
