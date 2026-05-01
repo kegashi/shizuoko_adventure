@@ -11,6 +11,7 @@
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 html,
@@ -37,6 +38,17 @@ body {
     sans-serif;
   justify-content: center;
   padding: 18px;
+  overscroll-behavior: none;
+}
+
+html.is-touch,
+html.is-touch body,
+html.is-touch button,
+html.is-touch canvas {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
 }
 
 button {
@@ -105,6 +117,13 @@ canvas {
   min-width: 190px;
 }
 
+.hud .oko-panel.is-damage {
+  animation: oko-shake 90ms linear infinite;
+  background: rgba(255, 235, 235, 0.95);
+  border-color: rgba(205, 24, 24, 0.92);
+  box-shadow: 0 0 0 3px rgba(225, 26, 26, 0.18);
+}
+
 .hud-label {
   color: #4b4848;
   font-size: 12px;
@@ -131,6 +150,36 @@ canvas {
   height: 100%;
   transition: width 120ms linear;
   width: 100%;
+}
+
+.oko-panel.is-damage .oko-meter {
+  background: rgba(255, 0, 0, 0.16);
+  border-color: rgba(205, 24, 24, 0.9);
+}
+
+.oko-panel.is-damage .oko-meter span {
+  background: linear-gradient(90deg, #d40000, #ff2b2b);
+}
+
+.oko-panel.is-damage strong {
+  color: #c41616;
+}
+
+@keyframes oko-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-20px);
+    transform: translateY(-20px);
+  }
+
+  75% {
+    transform: translateX(20px);
+    transform: translateY(20px);
+  }
 }
 
 .message {

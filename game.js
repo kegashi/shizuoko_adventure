@@ -4,6 +4,7 @@ const scoreEl = document.querySelector("#score");
 const distanceEl = document.querySelector("#distance");
 const okoEl = document.querySelector("#rage");
 const okoFillEl = document.querySelector("#okoFill");
+const okoPanelEl = document.querySelector(".oko-panel");
 const timeEl = document.querySelector("#time");
 const messageEl = document.querySelector("#message");
 const messageImageEl = document.querySelector("#messageImage");
@@ -159,7 +160,8 @@ function buildLevel(stage) {
     const width = stage.widthBase + (i % 5) * stage.widthStep;
     y = clamp(y + [-56, 38, -22, 54, -40, 18][i % 6], 286, 474);
     x += gap;
-    platforms.push({ x, y, w: width, h: i % 7 === 0 ? 42 : 34 });
+    const lowerPlatformWidth = stage.id === 3 && i === 9 ? width * 0.58 : width;
+    platforms.push({ x, y, w: lowerPlatformWidth, h: i % 7 === 0 ? 42 : 34 });
 
     if (i % 3 === 0) {
       platforms.push({
@@ -172,13 +174,18 @@ function buildLevel(stage) {
 
     if (i % 2 === 0) coins.push({ x: x + width * 0.42, y: y - 42, r: 16, got: false });
     if (i % stage.highCoinModulo === 0) {
-      coins.push({ x: x + width * 0.5, y: clamp(y - 160, 150, 380), r: 16, got: false });
+      const hasUpperPlatform = i % 3 === 0;
+      const needsHighCoinAssist = stage.id === 3 && !hasUpperPlatform;
+      const highCoinY = needsHighCoinAssist ? y - 120 : y - 160;
+      const highCoinX = needsHighCoinAssist ? x + width * 0.9 : x + width * 0.5;
+
+      coins.push({ x: highCoinX, y: clamp(highCoinY, 150, 380), r: 16, got: false });
     }
 
     if (i > stage.enemyStart && i % stage.enemyModulo === 0) {
       const type = stage.enemyTypes[i % stage.enemyTypes.length];
       if (type === "squad") {
-        const count = i % 4 === 0 && width >= 360 ? 3 : 2;
+        const count = 2;
         for (let n = 0; n < count; n += 1) {
           enemies.push(createEnemy("squad", x, y, width, i, stage, (n - (count - 1) / 2) * 86, n));
         }
@@ -256,6 +263,7 @@ function resetGame() {
       attackCostPending: false,
       attackQueued: false,
       attackHitThisSwing: false,
+      damageFlash: 0,
     },
     platforms: level.platforms,
     coins: level.coins,
@@ -416,8 +424,8 @@ function renderTitle() {
   renderStageSelect();
   renderRecordPanel();
   setMessage(
-    "スーパーしずオ",
-    "オコを燃やして家まで下校しよう。いちごを食べるとオコが回復するぞ！",
+    "スーパーしずオコ",
+    "オコを燃やして下校しよう。いちごを食べるとオコが回復するヨン！",
     "スタート",
     "",
     true,
@@ -484,6 +492,7 @@ function updateHud() {
   distanceEl.textContent = `${distanceMeters()}/${totalDistanceMeters()}m`;
   okoEl.textContent = `${Math.round(state.oko)}%`;
   okoFillEl.style.width = `${state.oko}%`;
+  okoPanelEl.classList.toggle("is-damage", state.player.damageFlash > 0);
   timeEl.textContent = state.elapsed.toFixed(1);
 }
 
@@ -503,6 +512,7 @@ function update(dt) {
   p.jumpBuffer -= dt;
   p.coyote -= dt;
   p.invuln -= dt;
+  p.damageFlash -= dt;
   p.attackTimer -= dt;
   p.attackCooldown -= dt;
 
@@ -572,10 +582,11 @@ function update(dt) {
     if (p.invuln <= 0 && rectsOverlap(p, hitbox)) {
       if (enemy.type === "armored" && enemy.armorContactGrace > 0) continue;
       state.damageHits += 1;
-      spendOko(40);
+      spendOko(50);
       p.vx = -p.facing * 250;
-      p.vy = -520;
+      p.vy = -400;
       p.invuln = 1;
+      p.damageFlash = 1;
       enemy.hitFlash = 0.25;
       if (state.mode !== "play") {
         updateHud();
@@ -589,10 +600,12 @@ function update(dt) {
     p.attackCostPending = false;
     p.attackCooldown = Math.min(p.attackCooldown, 0.18);
     if (attackTarget.type === "armored") {
-      attackTarget.x += p.facing * 65;
+      const nextArmorHits = attackTarget.armorHits + 1;
+      const knockback = nextArmorHits % 3 === 0 ? 195 : 65;
+      attackTarget.x += p.facing * knockback;
       attackTarget.dir = p.facing;
       attackTarget.hitFlash = 0.22;
-      attackTarget.armorHits += 1;
+      attackTarget.armorHits = nextArmorHits;
       attackTarget.armorStun = 0.62;
       attackTarget.armorContactGrace = 0.16;
       if (attackTarget.x < attackTarget.min || attackTarget.x > attackTarget.max) {
@@ -970,6 +983,7 @@ function drawPlayer(t) {
   const attacking = p.attackTimer > 0;
   const key = attacking ? "attackAir" : !p.grounded ? "jump" : moving ? (Math.floor(t * 10) % 2 ? "runA" : "runB") : "idle";
   const img = images[key] || images.idle;
+  const running = key === "runA" || key === "runB";
   const bob = p.grounded && moving && !attacking ? Math.sin(t * 18) * 3 : 0;
   const alpha = p.invuln > 0 && Math.floor(t * 18) % 2 === 0 ? 0.55 : 1;
   const drawW = attacking ? 150 : 120;
@@ -980,7 +994,7 @@ function drawPlayer(t) {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(x, y);
-  ctx.scale(attacking ? -p.facing : p.facing, 1);
+  ctx.scale(attacking || running ? -p.facing : p.facing, 1);
   ctx.drawImage(img, -drawW / 2, 0, drawW, drawH);
   if (state.oko < 30 && images.anger) {
     ctx.drawImage(images.anger, -60, -34, 44, 66);
@@ -1036,6 +1050,10 @@ function isTouchScreenInput(event) {
   return event.pointerType === "touch" || navigator.maxTouchPoints > 0;
 }
 
+function preventTouchBrowserGesture(event) {
+  if (navigator.maxTouchPoints > 0) event.preventDefault();
+}
+
 function tryStartGame() {
   if (navigator.maxTouchPoints > 0) {
     document.documentElement.requestFullscreen?.().catch?.(() => {});
@@ -1064,6 +1082,14 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => {
   if (["Space", "ArrowUp", "KeyW"].includes(event.code)) releaseJump();
 });
+
+["gesturestart", "gesturechange", "gestureend"].forEach((type) => {
+  document.addEventListener(type, preventTouchBrowserGesture, { passive: false });
+});
+
+document.addEventListener("dblclick", preventTouchBrowserGesture, { passive: false });
+document.addEventListener("contextmenu", preventTouchBrowserGesture);
+document.addEventListener("selectstart", preventTouchBrowserGesture);
 
 document.querySelectorAll("[data-hold]").forEach((button) => {
   const name = button.dataset.hold;
