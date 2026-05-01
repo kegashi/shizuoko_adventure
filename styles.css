@@ -234,6 +234,100 @@ canvas {
   touch-action: manipulation;
 }
 
+.stage-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 0 14px;
+  max-width: min(720px, calc(100% - 28px));
+}
+
+.stage-select button {
+  background: rgba(255, 255, 255, 0.78);
+  border: 2px solid rgba(29, 27, 27, 0.62);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+  min-width: 132px;
+  padding: 9px 12px;
+}
+
+.stage-select button.is-selected {
+  background: #db342f;
+  border-color: rgba(29, 27, 27, 0.84);
+  color: #fff;
+}
+
+.record-panel {
+  background: rgba(255, 255, 255, 0.68);
+  border: 2px solid rgba(29, 27, 27, 0.45);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  margin: 0 0 14px;
+  max-width: min(560px, calc(100% - 28px));
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.record-panel div {
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  justify-content: space-between;
+}
+
+.record-panel strong {
+  font-size: inherit;
+}
+
+.result-lines {
+  display: grid;
+  gap: 4px;
+}
+
+@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+  .controls-guide {
+    grid-template-columns: 1fr;
+    margin: 0;
+    max-width: 190px;
+    position: absolute;
+    right: 18px;
+    top: 138px;
+    width: 190px;
+  }
+
+  .controls-guide div {
+    padding: 7px 9px;
+  }
+
+  .record-panel {
+    margin: 0;
+    max-width: 240px;
+    padding-top: 28px;
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: 240px;
+  }
+
+  .record-panel::before {
+    color: #514d4d;
+    content: "最高記録";
+    font-size: 13px;
+    font-weight: 900;
+    left: 10px;
+    position: absolute;
+    top: 7px;
+  }
+
+  .record-panel div {
+    font-size: 12px;
+  }
+}
+
 .touch-controls {
   display: none;
 }
@@ -336,6 +430,10 @@ html.is-touch {
 
   .controls-guide {
     display: none;
+  }
+
+  .record-panel {
+    position: static;
   }
 
   .message {
@@ -464,9 +562,10 @@ html.is-touch {
 
   .touch-controls button {
     display: flex;
-    height: 52px;
+    font-size: clamp(22px, 5vw, 30px);
+    height: 78px;
     position: absolute;
-    width: clamp(112px, 34vw, 148px);
+    width: clamp(168px, 51vw, 222px);
   }
 
   .touch-controls .jump {
@@ -477,15 +576,19 @@ html.is-touch {
   .touch-controls .attack {
     bottom: 0;
     right: max(14px, env(safe-area-inset-right));
-    width: clamp(128px, 36vw, 164px);
+    width: clamp(192px, 54vw, 246px);
   }
 
   .message {
+    inset: 0;
+    justify-content: flex-start;
+    overflow-y: auto;
     padding-top: 12px;
+    position: fixed;
   }
 
   .message h1 {
-    font-size: clamp(24px, 8vw, 32px);
+    font-size: clamp(24px, 7vw, 32px);
     max-width: calc(100% - 24px);
   }
 
@@ -500,7 +603,80 @@ html.is-touch {
     display: inline-block;
   }
 
+  .stage-select {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: 1fr;
+    margin-bottom: 8px;
+    max-width: min(240px, calc(100% - 24px));
+    width: 100%;
+  }
+
+  .stage-select button {
+    font-size: 14px;
+    min-width: 0;
+    padding: 7px 10px;
+    width: 100%;
+  }
+
+  .record-panel {
+    gap: 3px;
+    margin-bottom: 8px;
+    max-width: min(240px, calc(100% - 24px));
+    padding: 7px 9px;
+  }
+
+  .record-panel div {
+    font-size: 12px;
+  }
+
   .rotate-hint {
     display: none;
+  }
+}
+
+@media (min-width: 761px) {
+  html:not(.is-touch) .game-shell {
+    height: auto;
+    max-width: 1180px;
+    width: min(100%, 1180px);
+  }
+
+  html:not(.is-touch) .stage-wrap {
+    aspect-ratio: 16 / 9;
+    border-width: 3px;
+    border-radius: 8px;
+    box-shadow: 0 18px 36px rgba(22, 53, 45, 0.28);
+    height: auto;
+    min-height: 0;
+    width: 100%;
+  }
+
+  html:not(.is-touch) .message {
+    justify-content: center;
+    overflow: hidden;
+    padding: 20px;
+    position: absolute;
+  }
+
+  html:not(.is-touch) .controls-guide {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 0;
+    max-width: 190px;
+    position: absolute;
+    right: 18px;
+    top: 150px;
+    width: 190px;
+  }
+
+  html:not(.is-touch) .record-panel {
+    margin: 0;
+    max-width: 240px;
+    padding: 28px 10px 8px;
+    position: absolute;
+    right: 18px;
+    top: 30px;
+    width: 240px;
   }
 }
