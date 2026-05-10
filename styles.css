@@ -24,9 +24,7 @@ body {
 
 body {
   align-items: center;
-  background:
-    radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.72), transparent 28%),
-    linear-gradient(180deg, #8bd2ee 0%, #e3f5ec 54%, #7dbf75 100%);
+  background: #98d6e9;
   color: var(--ink);
   display: flex;
   font-family:
@@ -213,16 +211,65 @@ canvas {
   overflow-wrap: anywhere;
 }
 
-.message img {
+.message-image-wrap {
   display: none;
   height: min(34%, 190px);
   margin-bottom: 8px;
-  object-fit: contain;
+  position: relative;
   width: min(72%, 260px);
+}
+
+.message-image-wrap:has(img.is-visible) {
+  display: block;
+}
+
+.message img {
+  display: none;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .message img.is-visible {
   display: block;
+}
+
+.message-image-copy {
+  display: none;
+  left: 50%;
+  position: absolute;
+  top: 66%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.message-image-grade,
+.message-image-text {
+  display: block;
+  font-weight: 900;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.message-image-grade {
+  color: #d81919;
+  font-size: clamp(11px, 1.8vw, 15px);
+  min-height: 1em;
+}
+
+.message-image-text {
+  color: #2b2420;
+  font-size: clamp(21px, 3.75vw, 29px);
+  margin-top: clamp(6px, 1vw, 9px);
+}
+
+.message.is-win .message-image-copy {
+  display: block;
+}
+
+.message.is-win h1 {
+  display: none;
 }
 
 .message p {
@@ -232,6 +279,14 @@ canvas {
   margin: 0 0 16px;
   max-width: calc(100% - 28px);
   overflow-wrap: anywhere;
+}
+
+.message p.title-description {
+  display: grid;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .controls-guide {
@@ -337,6 +392,24 @@ canvas {
   gap: 4px;
 }
 
+.result-line {
+  align-items: baseline;
+  display: grid;
+  gap: 5px;
+  grid-template-columns: 1em max-content max-content max-content;
+  justify-content: center;
+  line-height: 1.35;
+}
+
+.result-star {
+  color: #f28c20;
+}
+
+.result-points {
+  color: #4f4a45;
+  font-size: 0.86em;
+}
+
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
   .controls-guide {
     grid-template-columns: 1fr;
@@ -379,6 +452,7 @@ canvas {
 
 .touch-controls {
   display: none;
+  --touch-button-font-size: clamp(15px, 3vw, 20px);
 }
 
 .touch-controls button {
@@ -524,7 +598,7 @@ html.is-touch {
     border-radius: 7px;
     align-items: center;
     display: flex;
-    font-size: clamp(15px, 3vw, 20px);
+    font-size: var(--touch-button-font-size);
     height: clamp(34px, 6.8vw, 46px);
     justify-content: center;
     line-height: 1;
@@ -543,7 +617,7 @@ html.is-touch {
   .touch-controls .attack {
     bottom: 0;
     right: max(14px, env(safe-area-inset-right));
-    font-size: inherit;
+    font-size: var(--touch-button-font-size);
     width: clamp(128px, 20vw, 164px);
   }
 }
@@ -580,6 +654,22 @@ html.is-touch {
     flex-direction: column;
     gap: 10px;
     height: var(--app-height);
+    padding-top: max(126px, calc(env(safe-area-inset-top) + 114px));
+    position: relative;
+  }
+
+  .game-shell::after {
+    background: url("./shizuoko_images/gkok009_01.png") center / contain no-repeat;
+    bottom: max(86px, calc(env(safe-area-inset-bottom) + 76px));
+    content: "";
+    height: 260px;
+    opacity: 0.1;
+    pointer-events: none;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%) scaleX(-1);
+    width: 330px;
+    z-index: 0;
   }
 
   .stage-wrap {
@@ -587,11 +677,18 @@ html.is-touch {
     flex: 0 0 auto;
     height: auto;
     overflow: hidden;
+    position: relative;
     width: 100vw;
+    z-index: 1;
   }
 
   .hud {
-    top: 8px;
+    display: grid;
+    left: 8px;
+    position: fixed;
+    right: 8px;
+    top: max(8px, env(safe-area-inset-top));
+    z-index: 30;
   }
 
   .touch-controls {
@@ -605,13 +702,14 @@ html.is-touch {
     pointer-events: none;
     position: fixed;
     right: 0;
+    --touch-button-font-size: clamp(18px, 4.3vw, 24px);
     width: 100%;
     z-index: 20;
   }
 
   .touch-controls button {
     display: flex;
-    font-size: clamp(18px, 4.3vw, 24px);
+    font-size: var(--touch-button-font-size);
     height: 62px;
     position: absolute;
     width: clamp(130px, 42vw, 168px);

@@ -8,6 +8,8 @@ const okoPanelEl = document.querySelector(".oko-panel");
 const timeEl = document.querySelector("#time");
 const messageEl = document.querySelector("#message");
 const messageImageEl = document.querySelector("#messageImage");
+const messageImageGradeEl = document.querySelector("#messageImageGrade");
+const messageImageTextEl = document.querySelector("#messageImageText");
 const messageTextEl = messageEl.querySelector("p");
 const controlsGuideEl = document.querySelector(".controls-guide");
 const stageSelectEl = document.querySelector("#stageSelect");
@@ -92,6 +94,7 @@ const keys = {
   jump: false,
   attack: false,
 };
+let recordCache = null;
 
 function updateViewportHeight() {
   const height = window.visualViewport?.height || window.innerHeight;
@@ -318,9 +321,13 @@ function gainOko(amount) {
 
 function setMessage(title, text, button = "もう一度", imageKey = "", showControls = false, showStageMenu = false) {
   messageEl.querySelector("h1").textContent = title;
+  messageEl.classList.toggle("is-win", imageKey === "win");
   messageTextEl.classList.toggle("result-lines", Array.isArray(text));
+  messageTextEl.classList.toggle("title-description", Boolean(text?.titleLines));
   if (Array.isArray(text)) {
-    messageTextEl.replaceChildren(...text.map((line) => Object.assign(document.createElement("span"), { textContent: line })));
+    messageTextEl.replaceChildren(...text.map(createResultLine));
+  } else if (text?.titleLines) {
+    messageTextEl.replaceChildren(...text.titleLines.map((line) => Object.assign(document.createElement("span"), { textContent: line })));
   } else {
     messageTextEl.textContent = text;
   }
@@ -328,6 +335,8 @@ function setMessage(title, text, button = "もう一度", imageKey = "", showCon
   controlsGuideEl.hidden = !showControls;
   stageSelectEl.hidden = !showStageMenu;
   recordPanelEl.hidden = !showStageMenu;
+  messageImageTextEl.textContent = imageKey === "win" ? title : "";
+  messageImageGradeEl.textContent = "";
   if (imageKey && assets[imageKey]) {
     messageImageEl.src = assets[imageKey];
     messageImageEl.classList.add("is-visible");
@@ -335,6 +344,31 @@ function setMessage(title, text, button = "もう一度", imageKey = "", showCon
     messageImageEl.classList.remove("is-visible");
   }
   messageEl.classList.add("is-visible");
+}
+
+function resultGradeText(starCount) {
+  if (starCount === 1) return "★ ナイス";
+  if (starCount === 2) return "★★ ベリグッ！";
+  if (starCount >= 3) return "★★★ パーフェクト";
+  return "";
+}
+
+function createResultLine(line) {
+  if (typeof line === "string") return Object.assign(document.createElement("span"), { textContent: line });
+  const row = document.createElement("span");
+  row.className = "result-line";
+  const star = document.createElement("span");
+  star.className = "result-star";
+  star.textContent = line.star ? "★" : "";
+  const label = document.createElement("strong");
+  label.textContent = `${line.label}:`;
+  const value = document.createElement("span");
+  value.textContent = line.value;
+  const points = document.createElement("span");
+  points.className = "result-points";
+  points.textContent = `(${line.points})`;
+  row.append(star, label, value, points);
+  return row;
 }
 
 function distanceMeters() {
@@ -354,15 +388,27 @@ function calculateScore() {
   );
 }
 
+function isPerfectResult() {
+  return state.strawberries === state.totalStrawberries && state.damageHits === 0 && state.attackWhiffs === 0;
+}
+
+function formatPoints(points) {
+  return `${points}pt`;
+}
+
 function readRecords() {
+  if (recordCache) return recordCache;
   try {
-    return JSON.parse(localStorage.getItem(RECORD_KEY)) || {};
+    recordCache = JSON.parse(localStorage.getItem(RECORD_KEY)) || {};
+    return recordCache;
   } catch {
-    return {};
+    recordCache = {};
+    return recordCache;
   }
 }
 
 function writeRecords(records) {
+  recordCache = records;
   try {
     localStorage.setItem(RECORD_KEY, JSON.stringify(records));
   } catch {
@@ -375,14 +421,22 @@ function saveRecord(won) {
   const key = String(state.stageId);
   const current = records[key] || {};
   const meters = distanceMeters();
+  const score = calculateScore();
   const next = {
     completed: Boolean(current.completed || won),
     bestDistance: Math.max(current.bestDistance || 0, meters),
     bestScore: current.bestScore ?? null,
+    bestScorePerfect: Boolean(current.bestScorePerfect),
   };
-  if (won) next.bestScore = Math.max(current.bestScore ?? -Infinity, calculateScore());
+  if (won) {
+    const currentBestScore = current.bestScore ?? -Infinity;
+    const isNewBest = score >= currentBestScore;
+    next.bestScore = Math.max(currentBestScore, score);
+    if (isNewBest && isPerfectResult()) next.bestScorePerfect = true;
+  }
   records[key] = next;
   writeRecords(records);
+  return records;
 }
 
 function perfectMark(perfect) {
@@ -402,8 +456,7 @@ function renderStageSelect() {
   );
 }
 
-function renderRecordPanel() {
-  const records = readRecords();
+function renderRecordPanel(records = readRecords()) {
   recordPanelEl.replaceChildren(
     ...STAGES.map((stage) => {
       const row = document.createElement("div");
@@ -412,7 +465,7 @@ function renderRecordPanel() {
       const record = records[String(stage.id)];
       label.textContent = stage.name;
       if (!record) value.textContent = "未挑戦";
-      else if (record.completed) value.textContent = `最高スコア ${record.bestScore}`;
+      else if (record.completed) value.textContent = `最高スコア ${record.bestScore}${record.bestScorePerfect ? " ★" : ""}`;
       else value.textContent = `最高距離 ${record.bestDistance || 0}m`;
       row.append(label, value);
       return row;
@@ -425,7 +478,7 @@ function renderTitle() {
   renderRecordPanel();
   setMessage(
     "スーパーしずオコ",
-    "オコを燃やして下校しよう。いちごを食べるとオコが回復するヨン！",
+    { titleLines: ["オコを燃やして下校しよう。", "いちごを食べるとオコが回復するヨン！"] },
     "スタート",
     "",
     true,
@@ -435,23 +488,48 @@ function renderTitle() {
 
 function finishGame(won) {
   state.mode = won ? "win" : "lose";
-  saveRecord(won);
+  const records = saveRecord(won);
   const strawberries = state.strawberries;
   const meters = distanceMeters();
   if (won) {
+    const strawberryPerfect = strawberries === state.totalStrawberries;
+    const damagePerfect = state.damageHits === 0;
+    const whiffPerfect = state.attackWhiffs === 0;
+    const starCount = [strawberryPerfect, damagePerfect, whiffPerfect].filter(Boolean).length;
     setMessage(
-      "無事帰宅!",
+      "無事帰宅！",
       [
         `スコア ${calculateScore()}`,
-        `いちご ${strawberries}/${state.totalStrawberries}${perfectMark(strawberries === state.totalStrawberries)}`,
-        `敵からダメージ ${state.damageHits}回${perfectMark(state.damageHits === 0)}`,
-        `アタック空振り ${state.attackWhiffs}回${perfectMark(state.attackWhiffs === 0)}`,
+        { label: "距離", value: `${meters}m`, points: formatPoints(meters * 100), star: false },
+        {
+          label: "いちご",
+          value: `${strawberries}/${state.totalStrawberries}`,
+          points: formatPoints(strawberries * 500),
+          star: strawberryPerfect,
+        },
+        {
+          label: "敵からダメージ",
+          value: `${state.damageHits}回`,
+          points: formatPoints(state.damageHits * -5000),
+          star: damagePerfect,
+        },
+        {
+          label: "アタック空振り",
+          value: `${state.attackWhiffs}回`,
+          points: formatPoints(state.attackWhiffs * -500),
+          star: whiffPerfect,
+        },
       ],
       "もう一度",
       "win",
     );
+    messageImageGradeEl.textContent = resultGradeText(starCount);
+    renderRecordPanel(records);
+    recordPanelEl.hidden = false;
   } else {
-    setMessage("GAMEOVER", ["GAMEOVER:", `オコがなくなった / 距離 ${meters}/${totalDistanceMeters()}m`], "もう一度", "down");
+    setMessage("GAMEOVER", ["オコがなくなった...", `距離 ${meters}/${totalDistanceMeters()}m`], "もう一度", "down");
+    renderRecordPanel(records);
+    recordPanelEl.hidden = false;
   }
 }
 
@@ -639,11 +717,7 @@ function update(dt) {
 }
 
 function drawStageOneSky() {
-  const grd = ctx.createLinearGradient(0, 0, 0, H);
-  grd.addColorStop(0, "#79c9ec");
-  grd.addColorStop(0.62, "#eef8e4");
-  grd.addColorStop(1, "#80bf72");
-  ctx.fillStyle = grd;
+  ctx.fillStyle = "#9bd8ed";
   ctx.fillRect(0, 0, W, H);
 
   ctx.save();
@@ -675,11 +749,7 @@ function drawStageOneSky() {
 }
 
 function drawJungleSky() {
-  const grd = ctx.createLinearGradient(0, 0, 0, H);
-  grd.addColorStop(0, "#5ab7c5");
-  grd.addColorStop(0.48, "#b9e6b4");
-  grd.addColorStop(1, "#3c7d45");
-  ctx.fillStyle = grd;
+  ctx.fillStyle = "#80c9a5";
   ctx.fillRect(0, 0, W, H);
 
   ctx.save();
@@ -712,11 +782,7 @@ function drawJungleSky() {
 }
 
 function drawVolcanoSky() {
-  const grd = ctx.createLinearGradient(0, 0, 0, H);
-  grd.addColorStop(0, "#3b2630");
-  grd.addColorStop(0.52, "#a54d35");
-  grd.addColorStop(1, "#2f2521");
-  ctx.fillStyle = grd;
+  ctx.fillStyle = "#6b3b35";
   ctx.fillRect(0, 0, W, H);
 
   ctx.save();
@@ -984,6 +1050,7 @@ function drawPlayer(t) {
   const key = attacking ? "attackAir" : !p.grounded ? "jump" : moving ? (Math.floor(t * 10) % 2 ? "runA" : "runB") : "idle";
   const img = images[key] || images.idle;
   const running = key === "runA" || key === "runB";
+  const jumping = key === "jump";
   const bob = p.grounded && moving && !attacking ? Math.sin(t * 18) * 3 : 0;
   const alpha = p.invuln > 0 && Math.floor(t * 18) % 2 === 0 ? 0.55 : 1;
   const drawW = attacking ? 150 : 120;
@@ -994,7 +1061,7 @@ function drawPlayer(t) {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(x, y);
-  ctx.scale(attacking || running ? -p.facing : p.facing, 1);
+  ctx.scale(attacking || running || jumping ? -p.facing : p.facing, 1);
   ctx.drawImage(img, -drawW / 2, 0, drawW, drawH);
   if (state.oko < 30 && images.anger) {
     ctx.drawImage(images.anger, -60, -34, 44, 66);
