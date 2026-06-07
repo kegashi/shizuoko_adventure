@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja" class="portal-page">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>スコアシート | しずデジ</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="portal-body">
+    <main class="portal-shell profile-shell" aria-label="スコアシート">
+      <a class="back-link tsume-top-link" href="./index.html" aria-label="メインメニューへ戻る">‹</a>
+
+      <section class="score-sheet-panel">
+        <p class="portal-date">ポイントカード</p>
+        <h1>スコアシート</h1>
+        <p id="scoreOwner" class="score-owner">プロフィール未選択</p>
+        <div class="score-total">
+          <strong id="scoreTotal">0</strong>
+          <span>/ 15pt</span>
+        </div>
+        <div id="scoreStamps" class="score-stamps" aria-label="ポイント"></div>
+        <dl id="scoreBreakdown" class="score-breakdown"></dl>
+      </section>
+      <div class="score-actions">
+        <button id="claimPrize" class="claim-prize" type="button">景品受取(スタッフ操作)</button>
+        <p id="claimStatus" class="claim-status"></p>
+      </div>
+    </main>
+
+    <script src="./score-sheet-config.js"></script>
+    <script src="./score-sheet.js"></script>
+  </body>
+</html>

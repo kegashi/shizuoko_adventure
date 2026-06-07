@@ -1,68 +1,71 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" class="portal-page">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>スーパーしずオコ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>しずデジ お楽しみコンテンツ</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
-    <main class="game-shell">
-      <section class="stage-wrap" aria-label="スーパーしずオコ">
-        <canvas id="game" width="960" height="540"></canvas>
-        <div class="hud" aria-live="polite">
-          <div>
-            <span class="hud-label">いちご</span>
-            <strong id="score">0</strong>
-          </div>
-          <div>
-            <span class="hud-label">距離</span>
-            <strong id="distance">0m</strong>
-          </div>
-          <div class="oko-panel">
-            <span class="hud-label">オコ(体力)</span>
-            <div class="oko-meter" aria-hidden="true">
-              <span id="okoFill"></span>
-            </div>
-            <strong id="rage">100%</strong>
-          </div>
-          <div class="time-panel">
-            <span class="hud-label">時間</span>
-            <strong id="time">0.0</strong>
-          </div>
+  <body class="portal-body">
+    <main class="portal-shell" aria-label="しずデジ お楽しみコンテンツ">
+      <header class="portal-hero">
+        <div>
+          <p class="portal-date">2026.6.20</p>
+          <h1>しずデジ</h1>
+          <p>イベント中に遊べるお楽しみコンテンツ</p>
         </div>
-        <nav class="touch-controls" aria-label="タッチ操作">
-          <button data-hold="jump" class="jump" type="button" aria-label="ジャンプ">ジャンプ</button>
-          <button data-tap="attack" class="attack" type="button" aria-label="傘攻撃">アタック</button>
-        </nav>
-        <div class="rotate-hint" aria-hidden="true"></div>
-        <div id="message" class="message">
-          <div class="message-image-wrap">
-            <img id="messageImage" alt="" />
-            <span class="message-image-copy" aria-hidden="true">
-              <span id="messageImageGrade" class="message-image-grade"></span>
-              <span id="messageImageText" class="message-image-text"></span>
-            </span>
-          </div>
-          <h1>スーパーしずオコ</h1>
-          <p>オコを燃やして家まで下校しよう。いちごを食べるとオコが回復するぞ！</p>
-          <div id="stageSelect" class="stage-select" aria-label="ステージ選択"></div>
-          <div id="recordPanel" class="record-panel" aria-label="スコア記録"></div>
-          <dl class="controls-guide" aria-label="操作方法">
-            <div>
-              <dt>ジャンプ</dt>
-              <dd>Space / ↑ / W</dd>
-            </div>
-            <div>
-              <dt>傘攻撃</dt>
-              <dd>X / K / Shift</dd>
-            </div>
-          </dl>
-          <button id="startButton" type="button">スタート</button>
-        </div>
+        <img src="./shizuoko_images/gkok001_01.png" alt="しずオコくん" />
+      </header>
+
+      <section class="quick-links" aria-label="イベント情報">
+        <a class="content-card quick-card" href="https://tonamel.com/organize/JA5d5/competition/BOYHx/tournament?tournament_id=dG91cm5hbWVudC8xNDg2NDI4MzA3MDA3MzMyMzY0">
+          <span class="content-thumb thumb-tournament" aria-hidden="true">T</span>
+          <span class="content-text">
+            <span class="content-kicker">対戦表</span>
+            <strong>トーナメント</strong>
+          </span>
+        </a>
+        <a class="content-card quick-card" href="./profile.html">
+          <span class="content-thumb">
+            <img src="./shizuoko_images/gkok001_01.png" alt="" />
+          </span>
+          <span class="content-text">
+            <span class="content-kicker">参加者情報</span>
+            <strong>プロフィール</strong>
+          </span>
+        </a>
+      </section>
+
+      <section class="content-links" aria-label="コンテンツ一覧">
+        <a class="content-card" href="./tsume-digica.html">
+          <span class="content-thumb">
+            <img src="./assets/tsume-digica/20260620_tsume_vulcanusmon.png" alt="" />
+          </span>
+          <span class="content-text">
+            <span class="content-kicker">サイドイベント</span>
+            <strong>詰めデジカ</strong>
+            <span>盤面を読み切って勝利を目指そう。</span>
+          </span>
+        </a>
+        <a class="content-card" href="./game.html">
+          <span class="content-thumb">
+            <img src="./shizuoko_images/gkok010_02.png" alt="" />
+          </span>
+          <span class="content-text">
+            <span class="content-kicker">2Dアクション</span>
+            <strong>スーパーしずオコ</strong>
+            <span>オコを燃やして下校しよう。</span>
+          </span>
+        </a>
+        <a class="content-card score-card" href="./score-sheet.html">
+          <span class="content-thumb thumb-score" aria-hidden="true">15</span>
+          <span class="content-text">
+            <span class="content-kicker">ポイントカード</span>
+            <strong>スコアシート</strong>
+            <span>サイドイベントの達成状況を確認。</span>
+          </span>
+        </a>
       </section>
     </main>
-
-    <script src="./game.js"></script>
   </body>
 </html>

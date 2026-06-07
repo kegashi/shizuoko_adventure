@@ -450,7 +450,11 @@ function renderStageSelect() {
       button.type = "button";
       button.dataset.stageId = String(stage.id);
       button.classList.toggle("is-selected", stage.id === currentStageId);
-      button.textContent = `${stage.name}${stage.id === 1 ? " かんたん" : stage.id === 3 ? " むずかしい" : " ふつう"}`;
+      const name = document.createElement("span");
+      name.textContent = stage.name;
+      const difficulty = document.createElement("span");
+      difficulty.textContent = stage.id === 1 ? "かんたん" : stage.id === 3 ? "むずかしい" : "ふつう";
+      button.replaceChildren(name, difficulty);
       return button;
     }),
   );

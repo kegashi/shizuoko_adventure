@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja" class="portal-page">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>プロフィール | しずデジ</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="portal-body">
+    <main class="portal-shell profile-shell" aria-label="プロフィール">
+      <a class="back-link tsume-top-link" href="./index.html" aria-label="メインメニューへ戻る">‹</a>
+
+      <section id="profileSetup" class="profile-panel" aria-label="プロフィール選択">
+        <p id="profileStatus">プロフィール情報を読み込んでいます。</p>
+        <label>
+          チーム名
+          <select id="teamSelect" disabled>
+            <option value="">読み込み中</option>
+          </select>
+        </label>
+        <label>
+          ユーザー
+          <select id="userSelect" disabled>
+            <option value="">チームを選択してください</option>
+          </select>
+        </label>
+        <button id="saveProfile" type="button" disabled>プロフィールを表示</button>
+      </section>
+
+      <section id="profileCard" class="profile-card" hidden aria-label="プロフィールカード">
+        <p class="profile-team"></p>
+        <h2></h2>
+        <dl></dl>
+        <section class="match-panel" aria-label="フリーマッチ対戦登録">
+          <h3>フリーマッチ対戦</h3>
+          <p class="match-help">フリーマッチ対戦を行ったら対戦相手の名前をここに入力してください。</p>
+          <div class="match-search">
+            <input id="opponentSearch" type="search" placeholder="相手の名前・IDで検索" autocomplete="off" />
+            <button id="addOpponent" type="button" disabled>登録</button>
+          </div>
+          <div id="opponentResults" class="opponent-results" role="listbox" aria-label="候補"></div>
+          <ul id="matchList" class="match-list"></ul>
+        </section>
+        <button id="changeProfile" type="button">選び直す</button>
+      </section>
+    </main>
+
+    <script src="./profile-data.js" charset="utf-8"></script>
+    <script src="./profile.js"></script>
+  </body>
+</html>
