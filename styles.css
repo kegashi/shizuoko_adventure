@@ -713,6 +713,28 @@ button:disabled {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.puzzle-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.puzzle-rule {
+  border: 2px solid rgba(29, 27, 27, 0.16);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  font-size: 14px;
+  font-weight: 800;
+  gap: 5px;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+
+.puzzle-rule p {
+  margin: 0;
+}
+
 .puzzle-board {
   aspect-ratio: 1 / 1;
   background: #fff;
