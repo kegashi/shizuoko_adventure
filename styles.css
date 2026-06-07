@@ -1428,10 +1428,20 @@ html.is-touch {
     padding: 18px;
   }
 
+  .content-card strong {
+    font-size: clamp(24px, 6.8vw, 34px);
+    white-space: nowrap;
+  }
+
   .quick-card {
     grid-template-columns: 1fr;
     min-height: 118px;
     padding: 14px;
+  }
+
+  .quick-card strong {
+    font-size: clamp(15px, 4vw, 20px);
+    white-space: nowrap;
   }
 
   .quick-card .content-thumb {
