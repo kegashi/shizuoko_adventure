@@ -15,6 +15,7 @@ const controlsGuideEl = document.querySelector(".controls-guide");
 const stageSelectEl = document.querySelector("#stageSelect");
 const recordPanelEl = document.querySelector("#recordPanel");
 const startButton = document.querySelector("#startButton");
+const stageReturnButton = document.querySelector("#stageReturnButton");
 
 const W = 960;
 const H = 540;
@@ -319,7 +320,7 @@ function gainOko(amount) {
   state.oko = clamp(state.oko + amount, 0, MAX_OKO);
 }
 
-function setMessage(title, text, button = "もう一度", imageKey = "", showControls = false, showStageMenu = false) {
+function setMessage(title, text, button = "もう一度", imageKey = "", showControls = false, showStageMenu = false, showStageReturn = false) {
   messageEl.querySelector("h1").textContent = title;
   messageEl.classList.toggle("is-win", imageKey === "win");
   messageTextEl.classList.toggle("result-lines", Array.isArray(text));
@@ -335,6 +336,7 @@ function setMessage(title, text, button = "もう一度", imageKey = "", showCon
   controlsGuideEl.hidden = !showControls;
   stageSelectEl.hidden = !showStageMenu;
   recordPanelEl.hidden = !showStageMenu;
+  stageReturnButton.hidden = !showStageReturn;
   messageImageTextEl.textContent = imageKey === "win" ? title : "";
   messageImageGradeEl.textContent = "";
   if (imageKey && assets[imageKey]) {
@@ -526,12 +528,15 @@ function finishGame(won) {
       ],
       "もう一度",
       "win",
+      false,
+      false,
+      true,
     );
     messageImageGradeEl.textContent = resultGradeText(starCount);
     renderRecordPanel(records);
     recordPanelEl.hidden = false;
   } else {
-    setMessage("GAMEOVER", ["オコがなくなった...", `距離 ${meters}/${totalDistanceMeters()}m`], "もう一度", "down");
+    setMessage("GAMEOVER", ["オコがなくなった...", `距離 ${meters}/${totalDistanceMeters()}m`], "もう一度", "down", false, false, true);
     renderRecordPanel(records);
     recordPanelEl.hidden = false;
   }
@@ -1206,6 +1211,11 @@ window.addEventListener(
 );
 
 startButton.addEventListener("click", tryStartGame);
+
+stageReturnButton.addEventListener("click", () => {
+  state.mode = "title";
+  renderTitle();
+});
 
 stageSelectEl.addEventListener("click", (event) => {
   const button = event.target.closest("[data-stage-id]");

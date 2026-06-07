@@ -1,0 +1,1 @@
+window.SHIZUDIGI_PROFILE_API_URL = "";

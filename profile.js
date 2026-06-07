@@ -2,6 +2,7 @@ const PROFILE_STORAGE_KEY = "shizudigiProfile";
 const PROFILE_CACHE_KEY = "shizudigiProfileCsv";
 const PROFILE_ROW_KEY = "shizudigiProfileRow";
 const FREE_MATCH_KEY = "shizudigiFreeMatches";
+const PROFILE_API_URL = window.SHIZUDIGI_PROFILE_API_URL || "";
 const EMBEDDED_PROFILE_ROWS = window.SHIZUDIGI_PROFILE_ROWS || null;
 
 const setupEl = document.querySelector("#profileSetup");
@@ -68,6 +69,28 @@ function normalizeRows(csvRows) {
   nameColumn = pickColumn(profileColumns, ["名前", "ユーザー", "プレイヤー", "name", "Name"], 1);
   userIdColumn = profileColumns.find((column) => column.toLowerCase() === "userid") || "";
   return csvRows.slice(1).map((values) => Object.fromEntries(profileColumns.map((column, index) => [column, values[index]?.trim() || ""])));
+}
+
+function rowsToCsv(rows) {
+  return rows
+    .map((row) => {
+      return row
+        .map((cell) => {
+          const value = String(cell ?? "");
+          return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, "\"\"")}"` : value;
+        })
+        .join(",");
+    })
+    .join("\n");
+}
+
+function normalizeApiRows(data) {
+  const rows = Array.isArray(data) ? data : data?.rows;
+  if (!Array.isArray(rows) || !rows.length) return null;
+  if (Array.isArray(rows[0])) return rows;
+
+  const columns = Array.isArray(data?.columns) && data.columns.length ? data.columns : Object.keys(rows[0]);
+  return [columns, ...rows.map((row) => columns.map((column) => row[column] ?? ""))];
 }
 
 function unique(values) {
@@ -193,10 +216,40 @@ function renderOpponentResults(query) {
   );
 }
 
+async function fetchProfileRows() {
+  if (!PROFILE_API_URL) return null;
+
+  const url = `${PROFILE_API_URL}${PROFILE_API_URL.includes("?") ? "&" : "?"}_=${Date.now()}`;
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error("プロフィールAPIを読み込めませんでした");
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const rows = normalizeApiRows(await response.json());
+    if (!rows) throw new Error("プロフィールAPIの形式が不正です");
+    localStorage.setItem(PROFILE_CACHE_KEY, rowsToCsv(rows));
+    return rows;
+  }
+
+  const text = await response.text();
+  const rows = parseCsv(text);
+  if (!rows.length) throw new Error("プロフィールAPIの形式が不正です");
+  localStorage.setItem(PROFILE_CACHE_KEY, text);
+  return rows;
+}
+
 async function loadProfiles() {
   const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
   const cachedCsv = localStorage.getItem(PROFILE_CACHE_KEY);
-  const rows = EMBEDDED_PROFILE_ROWS || (cachedCsv ? parseCsv(cachedCsv) : null);
+  let rows = null;
+
+  try {
+    rows = await fetchProfileRows();
+  } catch (error) {
+    console.warn(error);
+  }
+
+  rows ||= (cachedCsv ? parseCsv(cachedCsv) : null) || EMBEDDED_PROFILE_ROWS;
   if (!rows) throw new Error("プロフィール情報を読み込めませんでした");
 
   profileRows = normalizeRows(rows);

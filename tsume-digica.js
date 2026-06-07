@@ -106,6 +106,22 @@ function formatCooldown(ms) {
   return `${minutes}:${seconds}`;
 }
 
+function syncClearMarks() {
+  const clears = readClears();
+  document.querySelectorAll(".puzzle-panel").forEach((panel) => {
+    const id = panel.querySelector(".puzzle-quiz[data-puzzle-id]")?.dataset.puzzleId;
+    const difficulty = panel.querySelector(".puzzle-title b");
+    panel.querySelector(".puzzle-clear-mark")?.remove();
+    if (!id || !difficulty || !clears[id]) return;
+
+    const mark = document.createElement("span");
+    mark.className = "puzzle-clear-mark";
+    mark.textContent = "✓";
+    mark.setAttribute("aria-label", "クリア済み");
+    difficulty.after(mark);
+  });
+}
+
 function renderQuizzes() {
   const clears = readClears();
   const feedbacks = readJson("shizudigiTsumeFeedbacks", {});
@@ -162,6 +178,7 @@ function renderQuizzes() {
     form.append(status, submit);
     container.replaceChildren(form);
   });
+  syncClearMarks();
   syncQuizButtons();
 }
 
