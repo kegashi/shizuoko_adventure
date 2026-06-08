@@ -1,6 +1,7 @@
 const CARD_BASE_URL = "https://digimon-cg-guide.com/wp-content/uploads/";
 const TSUME_CLEAR_KEY = "shizudigiTsumeClears";
 const TSUME_COOLDOWN_KEY = "shizudigiTsumeCooldowns";
+const TSUME_FEEDBACK_KEY = "shizudigiTsumeFeedbacks";
 const COOLDOWN_MS = 90 * 1000;
 const TSUME_QUIZZES = {
   1: {
@@ -95,8 +96,25 @@ function writeCooldowns(cooldowns) {
   localStorage.setItem(TSUME_COOLDOWN_KEY, JSON.stringify(cooldowns));
 }
 
-function cooldownLeft(id) {
-  return Math.max(0, (readCooldowns()[id] || 0) - Date.now());
+function clearExpiredCooldowns() {
+  const cooldowns = readCooldowns();
+  const feedbacks = readJson(TSUME_FEEDBACK_KEY, {});
+  let cooldownChanged = false;
+  let feedbackChanged = false;
+
+  Object.entries(cooldowns).forEach(([id, expiresAt]) => {
+    if (expiresAt > Date.now()) return;
+    delete cooldowns[id];
+    cooldownChanged = true;
+    if (feedbacks[id]?.startsWith("不正解")) {
+      delete feedbacks[id];
+      feedbackChanged = true;
+    }
+  });
+
+  if (cooldownChanged) writeCooldowns(cooldowns);
+  if (feedbackChanged) localStorage.setItem(TSUME_FEEDBACK_KEY, JSON.stringify(feedbacks));
+  return { cooldowns, feedbacks };
 }
 
 function formatCooldown(ms) {
@@ -124,12 +142,12 @@ function syncClearMarks() {
 
 function renderQuizzes() {
   const clears = readClears();
-  const feedbacks = readJson("shizudigiTsumeFeedbacks", {});
+  const { cooldowns, feedbacks } = clearExpiredCooldowns();
   document.querySelectorAll(".puzzle-quiz[data-puzzle-id]").forEach((container) => {
     const id = container.dataset.puzzleId;
     const quiz = TSUME_QUIZZES[id];
     const cleared = Boolean(clears[id]);
-    const remaining = cooldownLeft(id);
+    const remaining = Math.max(0, (cooldowns[id] || 0) - Date.now());
     if (!quiz) {
       container.replaceChildren();
       return;
@@ -246,16 +264,16 @@ document.addEventListener("submit", (event) => {
     const clears = readClears();
     clears[id] = true;
     writeClears(clears);
-    const feedbacks = readJson("shizudigiTsumeFeedbacks", {});
+    const feedbacks = readJson(TSUME_FEEDBACK_KEY, {});
     feedbacks[id] = "正解！ポイントに反映しました。";
-    localStorage.setItem("shizudigiTsumeFeedbacks", JSON.stringify(feedbacks));
+    localStorage.setItem(TSUME_FEEDBACK_KEY, JSON.stringify(feedbacks));
   } else {
     const cooldowns = readCooldowns();
     cooldowns[id] = Date.now() + COOLDOWN_MS;
     writeCooldowns(cooldowns);
-    const feedbacks = readJson("shizudigiTsumeFeedbacks", {});
+    const feedbacks = readJson(TSUME_FEEDBACK_KEY, {});
     feedbacks[id] = "不正解。1分30秒後に再回答できます。";
-    localStorage.setItem("shizudigiTsumeFeedbacks", JSON.stringify(feedbacks));
+    localStorage.setItem(TSUME_FEEDBACK_KEY, JSON.stringify(feedbacks));
   }
 
   renderQuizzes();
@@ -267,5 +285,5 @@ document.addEventListener("change", (event) => {
 
 renderQuizzes();
 setInterval(() => {
-  if (Object.values(readCooldowns()).some((expiresAt) => expiresAt > Date.now())) renderQuizzes();
+  if (Object.keys(readCooldowns()).length) renderQuizzes();
 }, 1000);
