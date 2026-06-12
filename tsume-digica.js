@@ -5,66 +5,71 @@ const TSUME_FEEDBACK_KEY = "shizudigiTsumeFeedbacks";
 const COOLDOWN_MS = 90 * 1000;
 const TSUME_QUIZZES = {
   1: {
+    answerSets: [
+      ["相手側8", "ウルヴァモン"],
+    ],
     questions: [
       {
         label: "ゲーム勝利時のメモリーは？",
         options: [
           "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0",
           "相手側1", "相手側2", "相手側3", "相手側4", "相手側5", "相手側6", "相手側7", "相手側8", "相手側9", "相手側10"],
-        answer: "相手側8",
       },
       {
         label: "レオルモンから進化したLv.4デジモンは？",
         options: ["クーガモン", "ウルヴァモン", "STアルマリザモン", "BTアルマリザモン"],
-        answer: "ウルヴァモン",
       },
     ],
   },
   2: {
+    answerSets: [
+      ["3", "相手側7"],
+    ],
     questions: [
       {
         label: "1枚目をチェックしたときのメモリーは？",
         options: [
           "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0",
           "相手側1", "相手側2", "相手側3", "相手側4", "相手側5", "相手側6", "相手側7", "相手側8", "相手側9", "相手側10"],
-        answer: "3",
       },
       {
         label: "ゲーム勝利時のメモリーは？",
         options: [
           "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0",
           "相手側1", "相手側2", "相手側3", "相手側4", "相手側5", "相手側6", "相手側7", "相手側8", "相手側9", "相手側10"],
-        answer: "相手側7",
       },
     ],
   },
   3: {
+    answerSets: [
+      ["相手側2", "ヴォルテクスドラモン"],
+      ["0", "グランゲイルモン"],
+    ],
     questions: [
       {
         label: "「カオスモン:ヴァロドゥルアーム」に進化/登場する直前のメモリーは？",
         options: [
           "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0",
           "相手側1", "相手側2", "相手側3", "相手側4", "相手側5", "相手側6", "相手側7", "相手側8", "相手側9", "相手側10"],
-        answer: "相手側2",
       },
       {
         label: "最後にアタックするデジモンは？",
         options: ["プテロモン", "ゲイルモン", "グランゲイルモン", "デラモン", "ゼファーガモン", "ヴァロドゥルモン", "ヴォルテクスドラモン", "カオスモン:ヴァロドゥルアーム"],
-        answer: "ヴォルテクスドラモン",
       },
     ],
   },
   4: {
+    answerSets: [
+      ["ファクトリアル・エリア", "ベルスターモン"],
+    ],
     questions: [
       {
         label: "最後に「4コスト明日奈」の【メイン】を使用したときに破棄したカードは？",
         options: ["イグニッションフレア", "タイダルストリーム", "神の両腕・バージョンΩ", "ファクトリアル・エリア", "ベルスターモン/フライバレット"],
-        answer: "ファクトリアル・エリア",
       },
       {
         label: "最後に「4コスト明日奈」の【メイン】を使用したときの進化先として選択したデジモンカードは？",
         options: ["ベアモン", "アイギオモン", "ブラックテイルモン", "グラップレオモン", "ダゴモン", "ウルカヌスモン", "マルスモン", "ベルスターモン"],
-        answer: "ベルスターモン",
       },
     ],
   },
@@ -209,6 +214,21 @@ function syncQuizButtons() {
   });
 }
 
+function isChoosingQuizOption() {
+  return document.activeElement?.matches("[data-quiz-select]");
+}
+
+function isQuizCorrect(quiz, formData) {
+  const submittedAnswers = quiz.questions.map((question, index) => formData.get(`q${index}`));
+  if (Array.isArray(quiz.answerSets)) {
+    return quiz.answerSets.some((answerSet) => {
+      return answerSet.length === submittedAnswers.length && answerSet.every((answer, index) => answer === submittedAnswers[index]);
+    });
+  }
+
+  return quiz.questions.every((question, index) => formData.get(`q${index}`) === question.answer);
+}
+
 document.querySelectorAll("[data-card-file]").forEach((button) => {
   const fileName = button.dataset.cardFile;
   const label = button.textContent;
@@ -258,7 +278,7 @@ document.addEventListener("submit", (event) => {
   const id = form.dataset.quizId;
   const quiz = TSUME_QUIZZES[id];
   const answers = new FormData(form);
-  const isCorrect = quiz.questions.every((question, index) => answers.get(`q${index}`) === question.answer);
+  const isCorrect = isQuizCorrect(quiz, answers);
 
   if (isCorrect) {
     const clears = readClears();
@@ -283,7 +303,15 @@ document.addEventListener("change", (event) => {
   if (event.target.matches("[data-quiz-select]")) syncQuizButtons();
 });
 
+document.addEventListener(
+  "blur",
+  (event) => {
+    if (event.target.matches("[data-quiz-select]") && Object.keys(readCooldowns()).length) renderQuizzes();
+  },
+  true,
+);
+
 renderQuizzes();
 setInterval(() => {
-  if (Object.keys(readCooldowns()).length) renderQuizzes();
+  if (Object.keys(readCooldowns()).length && !isChoosingQuizOption()) renderQuizzes();
 }, 1000);
