@@ -249,7 +249,9 @@ async function loadProfiles() {
   }
 
   rows ||= cachedCsv ? parseCsv(cachedCsv) : null;
-  if (!rows) throw new Error("プロフィール情報を読み込めませんでした");
+  if (!rows) {
+    throw new Error(PROFILE_API_URL ? "プロフィール情報を読み込めませんでした" : "プロフィールAPI URLが未設定です");
+  }
 
   profileRows = normalizeRows(rows);
   fillTeams();
