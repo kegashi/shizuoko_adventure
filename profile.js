@@ -3,7 +3,6 @@ const PROFILE_CACHE_KEY = "shizudigiProfileCsv";
 const PROFILE_ROW_KEY = "shizudigiProfileRow";
 const FREE_MATCH_KEY = "shizudigiFreeMatches";
 const PROFILE_API_URL = window.SHIZUDIGI_PROFILE_API_URL || "";
-const EMBEDDED_PROFILE_ROWS = window.SHIZUDIGI_PROFILE_ROWS || null;
 
 const setupEl = document.querySelector("#profileSetup");
 const statusEl = document.querySelector("#profileStatus");
@@ -249,7 +248,7 @@ async function loadProfiles() {
     console.warn(error);
   }
 
-  rows ||= (cachedCsv ? parseCsv(cachedCsv) : null) || EMBEDDED_PROFILE_ROWS;
+  rows ||= cachedCsv ? parseCsv(cachedCsv) : null;
   if (!rows) throw new Error("プロフィール情報を読み込めませんでした");
 
   profileRows = normalizeRows(rows);
