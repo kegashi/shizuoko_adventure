@@ -3,8 +3,10 @@ const SCORE_MATCH_KEY = "shizudigiFreeMatches";
 const SCORE_GAME_KEY = "superShizuoRecords";
 const SCORE_TSUME_KEY = "shizudigiTsumeClears";
 const SCORE_PRIZE_KEY = "shizudigiPrizeClaimed";
+const SCORE_FLAGS_KEY = "shizudigiProfileFlags";
 const SCORE_LOG_URL = window.SHIZUDIGI_SCORE_LOG_URL || "";
 const SCORE_LOG_CSV_URL = window.SHIZUDIGI_SCORE_LOG_CSV_URL || "";
+const MAIN_EVENT_POINTS = 6;
 
 const ownerEl = document.querySelector("#scoreOwner");
 const totalEl = document.querySelector("#scoreTotal");
@@ -12,6 +14,7 @@ const stampsEl = document.querySelector("#scoreStamps");
 const breakdownEl = document.querySelector("#scoreBreakdown");
 const claimButton = document.querySelector("#claimPrize");
 const claimStatusEl = document.querySelector("#claimStatus");
+const profileLinkEl = document.querySelector("#scoreProfileLink");
 
 function readJson(key, fallback) {
   try {
@@ -65,20 +68,34 @@ function parseCsv(text) {
 }
 
 function tsumePoints(count) {
-  if (count >= 4) return 3;
-  if (count >= 3) return 2;
-  if (count >= 1) return 1;
-  return 0;
+  return count + (count >= 4 ? 1 : 0);
 }
 
 function renderBreakdown(items) {
   breakdownEl.replaceChildren(
     ...items.flatMap((item) => {
-      const dt = document.createElement("dt");
+      const dt = item.href ? document.createElement("a") : document.createElement("dt");
       const dd = document.createElement("dd");
+      if (item.href) {
+        dt.href = item.href;
+        dt.className = "score-breakdown-link";
+      }
       dt.textContent = item.label;
       dd.textContent = `${item.points}pt`;
-      if (item.detail) dd.dataset.detail = item.detail;
+      if (Array.isArray(item.detailLines)) {
+        const detail = document.createElement("span");
+        detail.className = "score-breakdown-detail";
+        detail.replaceChildren(
+          ...item.detailLines.map((line) => {
+            const row = document.createElement("span");
+            row.textContent = line;
+            return row;
+          }),
+        );
+        dd.append(detail);
+      } else if (item.detail) {
+        dd.dataset.detail = item.detail;
+      }
       return [dt, dd];
     }),
   );
@@ -110,14 +127,17 @@ function collectScoreState() {
   const matches = readJson(SCORE_MATCH_KEY, []);
   const gameRecords = readJson(SCORE_GAME_KEY, {});
   const tsumeClears = readJson(SCORE_TSUME_KEY, {});
+  const flags = readJson(SCORE_FLAGS_KEY, { posted: false, purchased: false });
   const bonus = numberValue(findField(profile, ["bonuspoint"]));
   const freeMatchPoints = matches.length;
   const normalClearPoint = gameRecords["2"]?.completed ? 1 : 0;
   const hardClearPoint = gameRecords["3"]?.completed ? 1 : 0;
   const tsumeClearCount = Object.values(tsumeClears).filter(Boolean).length;
   const tsumeClearPoints = tsumePoints(tsumeClearCount);
-  const points = Math.min(15, 8 + bonus + freeMatchPoints + normalClearPoint + hardClearPoint + tsumeClearPoints);
-  return { bonus, freeMatchPoints, gameRecords, hardClearPoint, matches, normalClearPoint, points, profile, tsumeClearCount, tsumeClearPoints, tsumeClears };
+  const purchasePoints = flags.purchased ? 1 : 0;
+  const postedPoints = flags.posted ? 2 : 0;
+  const points = Math.min(15, MAIN_EVENT_POINTS + bonus + freeMatchPoints + normalClearPoint + hardClearPoint + tsumeClearPoints + purchasePoints + postedPoints);
+  return { bonus, flags, freeMatchPoints, gameRecords, hardClearPoint, matches, normalClearPoint, points, postedPoints, profile, purchasePoints, tsumeClearCount, tsumeClearPoints, tsumeClears };
 }
 
 function buildScoreLogPayload() {
@@ -170,13 +190,26 @@ function isClaimedByCsv(rows, profile) {
 }
 
 function renderScoreSheet() {
-  const { bonus, freeMatchPoints, hardClearPoint, matches, normalClearPoint, points, profile, tsumeClearCount, tsumeClearPoints } = collectScoreState();
+  const { bonus, freeMatchPoints, hardClearPoint, matches, normalClearPoint, points, postedPoints, profile, purchasePoints, tsumeClearCount, tsumeClearPoints } = collectScoreState();
+  if (!profile) {
+    document.querySelector(".score-sheet-panel").hidden = true;
+    document.querySelector(".score-actions").hidden = true;
+    profileLinkEl.hidden = false;
+    return;
+  }
+  document.querySelector(".score-sheet-panel").hidden = false;
+  document.querySelector(".score-actions").hidden = false;
+  profileLinkEl.hidden = true;
+
+  const matchNames = matches.map((match) => match.label.replace(/\s*@\S+$/, ""));
   const items = [
-    { label: "メインイベント参加", points: 8 },
-    { label: "ボーナス", points: bonus },
-    { label: "フリー対戦", points: freeMatchPoints, detail: `${matches.length}人` },
-    { label: "スーパーしずオコ", points: normalClearPoint + hardClearPoint, detail: `ふつう ${normalClearPoint}pt / むずかしい ${hardClearPoint}pt` },
-    { label: "詰めデジカ", points: tsumeClearPoints, detail: `${tsumeClearCount}問クリア` },
+    { label: "メインイベント参加", points: MAIN_EVENT_POINTS },
+    { label: "追加点", points: bonus },
+    { label: "フリー対戦", points: freeMatchPoints, detailLines: matchNames.length ? matchNames : ["未登録"], href: "./profile.html" },
+    { label: "スーパーしずオコ", points: normalClearPoint + hardClearPoint, detail: `ふつう ${normalClearPoint}pt / むずかしい ${hardClearPoint}pt`, href: "./game.html" },
+    { label: "詰めデジカ", points: tsumeClearPoints, detail: `${tsumeClearCount}問クリア`, href: "./tsume-digica.html" },
+    { label: "買い物", points: purchasePoints, href: "./profile.html" },
+    { label: "#しずデジ投稿", points: postedPoints, href: "./profile.html" },
   ];
   const name = findField(profile, ["username", "name", "名前", "ユーザー", "プレイヤー"]) || "プロフィール未選択";
   const userId = findField(profile, ["userid"]).replace(/^@/, "");

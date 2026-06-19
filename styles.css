@@ -126,6 +126,11 @@ button:disabled {
   margin: 0 0 12px;
 }
 
+.portal-hero .portal-main-title {
+  font-size: clamp(30px, 7vw, 72px);
+  white-space: nowrap;
+}
+
 .portal-hero p:not(.portal-date) {
   font-size: clamp(16px, 2.2vw, 22px);
   font-weight: 800;
@@ -486,6 +491,76 @@ button:disabled {
   padding: 4px 8px;
 }
 
+.profile-toggles {
+  border-top: 2px solid rgba(29, 27, 27, 0.12);
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.toggle-row {
+  align-items: center;
+  border: 2px solid rgba(29, 27, 27, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 10px 12px;
+}
+
+.toggle-row > span:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.toggle-row strong {
+  font-size: 15px;
+}
+
+.toggle-row small {
+  color: #5d5955;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.toggle-row input {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.toggle-switch {
+  background: #d9d5d0;
+  border: 2px solid rgba(29, 27, 27, 0.55);
+  border-radius: 999px;
+  display: block;
+  height: 30px;
+  position: relative;
+  width: 54px;
+}
+
+.toggle-switch::before {
+  background: #fff;
+  border-radius: 999px;
+  content: "";
+  height: 20px;
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  transition: transform 140ms ease;
+  width: 20px;
+}
+
+.toggle-row input:checked + .toggle-switch {
+  background: #1f9d48;
+  border-color: #157236;
+}
+
+.toggle-row input:checked + .toggle-switch::before {
+  transform: translateX(24px);
+}
+
 .score-sheet-panel {
   background: rgba(255, 255, 255, 0.94);
   border: 2px solid rgba(29, 27, 27, 0.72);
@@ -569,6 +644,7 @@ button:disabled {
 }
 
 .score-breakdown dt,
+.score-breakdown a,
 .score-breakdown dd {
   border-top: 1px solid rgba(29, 27, 27, 0.12);
   font-weight: 900;
@@ -576,22 +652,56 @@ button:disabled {
   padding-top: 8px;
 }
 
+.score-breakdown a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .score-breakdown dd {
   text-align: right;
 }
 
-.score-breakdown dd::after {
+.score-breakdown dd::after,
+.score-breakdown-detail {
   color: #5d5955;
-  content: attr(data-detail);
   display: block;
   font-size: 12px;
   margin-top: 2px;
+}
+
+.score-breakdown dd::after {
+  content: attr(data-detail);
+}
+
+.score-breakdown-detail {
+  line-height: 1.35;
+}
+
+.score-breakdown-detail span {
+  display: block;
 }
 
 .score-actions {
   display: grid;
   gap: 8px;
   justify-items: center;
+}
+
+.score-profile-link {
+  background: var(--ink);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  justify-self: stretch;
+  line-height: 1.35;
+  max-width: 100%;
+  padding: 14px 18px;
+  text-align: center;
+  text-decoration: none;
 }
 
 .claim-prize {
@@ -1451,6 +1561,8 @@ html.is-touch {
 
   .portal-shell {
     gap: 14px;
+    max-width: 100%;
+    width: 100%;
   }
 
   .portal-hero {

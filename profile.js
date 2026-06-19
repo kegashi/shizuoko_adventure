@@ -2,6 +2,7 @@ const PROFILE_STORAGE_KEY = "shizudigiProfile";
 const PROFILE_CACHE_KEY = "shizudigiProfileCsv";
 const PROFILE_ROW_KEY = "shizudigiProfileRow";
 const FREE_MATCH_KEY = "shizudigiFreeMatches";
+const PROFILE_FLAGS_KEY = "shizudigiProfileFlags";
 const PROFILE_API_URL = window.SHIZUDIGI_PROFILE_API_URL || "";
 
 const setupEl = document.querySelector("#profileSetup");
@@ -15,6 +16,8 @@ const opponentSearchEl = document.querySelector("#opponentSearch");
 const addOpponentButton = document.querySelector("#addOpponent");
 const opponentResultsEl = document.querySelector("#opponentResults");
 const matchListEl = document.querySelector("#matchList");
+const postedToggle = document.querySelector("#postedToggle");
+const purchaseToggle = document.querySelector("#purchaseToggle");
 
 let profileRows = [];
 let profileColumns = [];
@@ -70,6 +73,18 @@ function normalizeRows(csvRows) {
   return csvRows.slice(1).map((values) => Object.fromEntries(profileColumns.map((column, index) => [column, values[index]?.trim() || ""])));
 }
 
+function useProfileColumns(columns) {
+  profileColumns = columns;
+  teamColumn = pickColumn(profileColumns, ["チーム", "team", "Team"], 0);
+  nameColumn = pickColumn(profileColumns, ["名前", "ユーザー", "プレイヤー", "name", "Name"], 1);
+  userIdColumn = profileColumns.find((column) => column.toLowerCase() === "userid") || "";
+}
+
+function useProfileRows(rows) {
+  useProfileColumns(rows[0].map((column) => column.trim()));
+  profileRows = rows.slice(1).map((values) => Object.fromEntries(profileColumns.map((column, index) => [column, values[index]?.trim() || ""])));
+}
+
 function rowsToCsv(rows) {
   return rows
     .map((row) => {
@@ -115,6 +130,13 @@ function profileLabel(row) {
   return userId ? `${name} @${userId}` : name;
 }
 
+function sameProfile(a, b) {
+  const aUserId = userIdColumn ? a?.[userIdColumn] : "";
+  const bUserId = userIdColumn ? b?.[userIdColumn] : "";
+  if (aUserId && bUserId) return aUserId === bUserId;
+  return Boolean(a?.[nameColumn] && a[nameColumn] === b?.[nameColumn] && a?.[teamColumn] === b?.[teamColumn]);
+}
+
 function fillTeams() {
   const teams = unique(profileRows.map((row) => row[teamColumn]));
   teamSelect.replaceChildren(new Option("選択してください", ""), ...teams.map((team) => new Option(team, team)));
@@ -149,6 +171,7 @@ function renderProfile(row) {
   );
   renderMatchList();
   renderOpponentResults("");
+  renderProfileFlags();
 }
 
 function createProfileDetail(label, value) {
@@ -166,6 +189,20 @@ function readMatches() {
 
 function writeMatches(matches) {
   localStorage.setItem(FREE_MATCH_KEY, JSON.stringify(matches));
+}
+
+function readFlags() {
+  return readJson(PROFILE_FLAGS_KEY, { posted: false, purchased: false });
+}
+
+function writeFlags(flags) {
+  localStorage.setItem(PROFILE_FLAGS_KEY, JSON.stringify(flags));
+}
+
+function renderProfileFlags() {
+  const flags = readFlags();
+  postedToggle.checked = Boolean(flags.posted);
+  purchaseToggle.checked = Boolean(flags.purchased);
 }
 
 function renderMatchList() {
@@ -240,7 +277,14 @@ async function fetchProfileRows() {
 async function loadProfiles() {
   const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
   const cachedCsv = localStorage.getItem(PROFILE_CACHE_KEY);
+  const savedRow = readJson(PROFILE_ROW_KEY, null);
   let rows = null;
+
+  if (savedRow) {
+    useProfileColumns(Object.keys(savedRow));
+    renderProfile(savedRow);
+    statusEl.textContent = "プロフィール情報を更新しています。";
+  }
 
   try {
     rows = await fetchProfileRows();
@@ -250,14 +294,18 @@ async function loadProfiles() {
 
   rows ||= cachedCsv ? parseCsv(cachedCsv) : null;
   if (!rows) {
+    if (savedRow) return;
     throw new Error(PROFILE_API_URL ? "プロフィール情報を読み込めませんでした" : "プロフィールAPI URLが未設定です");
   }
 
-  profileRows = normalizeRows(rows);
+  useProfileRows(rows);
   fillTeams();
   statusEl.textContent = "チーム名とユーザーを選択してください。";
 
-  if (saved) {
+  if (savedRow) {
+    const row = profileRows.find((profileRow) => sameProfile(profileRow, savedRow));
+    if (row) renderProfile(row);
+  } else if (saved) {
     const row = profileRows[Number(saved)];
     if (row) renderProfile(row);
   }
@@ -308,6 +356,15 @@ matchListEl.addEventListener("click", (event) => {
   if (!button) return;
   writeMatches(readMatches().filter((match) => match.key !== button.dataset.matchKey));
   renderMatchList();
+});
+
+[postedToggle, purchaseToggle].forEach((toggle) => {
+  toggle.addEventListener("change", () => {
+    writeFlags({
+      posted: postedToggle.checked,
+      purchased: purchaseToggle.checked,
+    });
+  });
 });
 
 loadProfiles().catch((error) => {
