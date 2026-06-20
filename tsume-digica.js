@@ -8,6 +8,7 @@ const TSUME_QUIZZES = {
     answerSets: [
       ["相手側8", "ウルヴァモン"],
       ["0", "ウルヴァモン"],
+      ["0", "クーガモン"],
     ],
     questions: [
       {
